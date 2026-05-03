@@ -1,2 +1,113 @@
 # void-creature
 Interactive weird creature that follows touch
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weird Creature</title>
+
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #111, #000);
+  }
+
+  canvas {
+    display: block;
+  }
+</style>
+</head>
+
+<body>
+<canvas id="c"></canvas>
+
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// عدد أجزاء الجسم
+const segments = 25;
+let points = [];
+
+// إنشاء الجسم
+for (let i = 0; i < segments; i++) {
+  points.push({
+    x: canvas.width / 2,
+    y: canvas.height / 2
+  });
+}
+
+// الهدف (مكان الضغط)
+let target = { x: canvas.width / 2, y: canvas.height / 2 };
+
+// لمس الهاتف
+canvas.addEventListener("touchstart", (e) => {
+  const t = e.touches[0];
+  target.x = t.clientX;
+  target.y = t.clientY;
+});
+
+// دعم الماوس أيضاً
+canvas.addEventListener("click", (e) => {
+  target.x = e.clientX;
+  target.y = e.clientY;
+});
+
+// الحركة
+function update() {
+  // الرأس يتحرك نحو الهدف
+  let head = points[0];
+  head.x += (target.x - head.x) * 0.1;
+  head.y += (target.y - head.y) * 0.1;
+
+  // بقية الجسم يتبع
+  for (let i = 1; i < points.length; i++) {
+    let prev = points[i - 1];
+    let p = points[i];
+
+    p.x += (prev.x - p.x) * 0.3;
+    p.y += (prev.y - p.y) * 0.3;
+  }
+}
+
+// الرسم
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < points.length; i++) {
+    let p = points[i];
+
+    let size = 12 - i * 0.4;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+
+    // لون غريب متغير
+    ctx.fillStyle = `hsl(${i * 15 + Date.now() * 0.05}, 80%, 60%)`;
+    ctx.fill();
+  }
+}
+
+// حلقة الأنيميشن
+function animate() {
+  update();
+  draw();
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// تعديل الحجم عند تغيير الشاشة
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
